@@ -1,0 +1,42 @@
+www:
+  build: .
+  ports:
+    - "80:80"
+    - "443:443"
+  links:
+    - db
+    - elastic
+  volumes:
+    - "./src/apache:/etc/apache2/sites-enabled"
+    - "./src/html:/var/www/html"
+  working_dir: "/var/www/html"
+
+db:
+  image: mysql
+  ports:
+    - "3306:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: 123456
+    MYSQL_DATABASE: svoi_dev
+  volumes:
+    - "./src/mysql:/var/lib/mysql"
+    - "./src/mysql-conf:/etc/mysql/conf.d"
+  restart: always
+
+elastic:
+  image: elasticsearch
+  command: elasticsearch -Des.network.host=0.0.0.0
+  ports:
+    - "9200:9200"
+    - "9300:9300"
+
+phpmyadmin:
+  image: phpmyadmin/phpmyadmin
+  environment:
+    MYSQL_ROOT_PASSWORD: 123456
+    MYSQL_USER: root
+    MYSQL_PASSWORD: 123456
+  links:
+    - db
+  ports:
+    - 8080:80
